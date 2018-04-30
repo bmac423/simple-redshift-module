@@ -1,3 +1,4 @@
+# Adds role for S3 acccess
 resource "aws_iam_role" "redshift_s3_access" {
   name               = "S3-Access"
   assume_role_policy = <<EOF
@@ -16,12 +17,14 @@ resource "aws_iam_role" "redshift_s3_access" {
 EOF
 }
 
+# Attaches S3 Read Only policy to the redshift S3 role
 resource "aws_iam_policy_attachment" "redshift_s3_access" {
   name = "s3-read-only"
   roles = ["${aws_iam_role.redshift_s3_access.name}"]
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
 }
 
+# Creates the S3 Bucket for the Redshift Cluster
 resource "aws_s3_bucket" "this" {
   bucket = "redshift-${var.charge_code}-bucket"
   acl    = "private"
@@ -30,6 +33,7 @@ resource "aws_s3_bucket" "this" {
   }
 }
 
+# Creates the Redshift Cluster
 resource "aws_redshift_cluster" "this" {
   cluster_identifier                  = "${var.cluster_name}"
   node_type                           = "${var.node_type}"
